@@ -1,0 +1,30 @@
+stages:
+  - deploy
+
+firbase-deploy:
+  stage: deploy
+  image: registry.gotbitgames.co:444/yarn-firebase
+  tags:
+    - k8s
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'frontend-stable'
+      variables:
+        FIREBASE_PROJECT: $FIREBASE_PROJECT_PROD
+        FIREBASE_TOKEN: $FIREBASE_TOKEN_PROD
+        VITE_MORALIS_ID: $MORALIS_ID_PROD
+        VITE_DEBUG: 'false'
+    - if: $CI_COMMIT_BRANCH == 'frontend-dev'
+      variables:
+        FIREBASE_PROJECT: $FIREBASE_PROJECT_DEV
+        FIREBASE_TOKEN: $FIREBASE_TOKEN_DEV
+        VITE_MORALIS_ID: $MORALIS_ID_DEV
+        VITE_DEBUG: 'true'
+    - when: always
+      variables:
+        FIREBASE_PROJECT: $FIREBASE_PROJECT_TEST
+        FIREBASE_TOKEN: $FIREBASE_TOKEN_TEST
+        VITE_MORALIS_ID: $MORALIS_ID_TEST
+        VITE_DEBUG: 'true'
+  script:
+    - cd frontend
+    - yarn deploy:cicd
